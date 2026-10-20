@@ -13,12 +13,16 @@ def options(payload):
     o={'mode':raw.get('mode','full'),'section':raw.get('section','abstract'),
        'paper_kind':raw.get('paper_kind','modeling'),'language':raw.get('language','zh'),
        'style':raw.get('style','generic'),'action':raw.get('action','draft'),
-       'paper_type':raw.get('paper_type','research'),'chart_type':raw.get('chart_type','line')}
+       'paper_type':raw.get('paper_type','research'),'chart_type':raw.get('chart_type','line'),
+       'template_style':raw.get('template_style','auto')}
     choices={'mode':('full','section','figure','table'),'section':tuple(SECTIONS),
       'paper_kind':('research','modeling'),'language':('zh','en'),'style':('generic','nature','nat-comms','nat-mach-intell'),
-      'action':('draft','polish'),'paper_type':('research','methods','algorithmic','review','hypothesis'),'chart_type':('line','bar','scatter')}
+      'action':('draft','polish'),'paper_type':('research','methods','algorithmic','review','hypothesis'),'chart_type':('line','bar','scatter'),
+      'template_style':('auto','cumcm','generic')}
     for k,values in choices.items():
         if o[k] not in values:raise ValueError('无效的写作选项：'+k)
+    o['format']=[] if o['mode'] in ('figure','table') else list(dict.fromkeys(raw.get('format') or []))
+    if any(x not in ('structure','normalize','compile','checklist','figures') for x in o['format']):raise ValueError('无效的格式组织选项')
     if o['mode']=='section' and o['section']=='full':raise ValueError('章节任务需选择具体章节')
     for key,size in [('venue',160),('x_column',100),('y_columns',500),('x_label',150),('y_label',150),('caption',600)]:
         o[key]=str(raw.get(key,''))[:size].strip()
@@ -32,9 +36,6 @@ def skill_files(root,o):
     root=Path(root);paths=[]
     name='nature-polishing' if o['action']=='polish' else 'nature-writing'
     base=root/name
-    if not (base/'SKILL.md').exists():
-        if o['style']!='generic':raise ValueError('所选 Nature 风格需要导入对应 Nature 技能及 nature-shared；也可选择通用学术风格')
-        return []
     if o['paper_kind']=='research' or o['style']!='generic':
         paths += [base/'SKILL.md',base/'manifest.yaml']
         paths += [root/'nature-shared/core'/n for n in ['reader-workflow.md','paper-type-taxonomy.md','ethics.md','terminology-ledger.md']]
@@ -67,6 +68,8 @@ def guidance(root,o):
       f'动作={o["action"]}；目标={o["venue"] or "未指定期刊"}；语言={"中文" if o["language"]=="zh" else "English"}。'
       '以所选语言输出正文；中文任务不因 Nature 技能的默认约定改成英文。只返回纯 LaTeX，规划、提纲、证据表和解释保留在内部。'
       '只写选定章节；不得添加未请求的整篇内容。整篇任务按提供模板结构。润色保留事实和未涉及部分，不能扩写研究结果。'
-      '模板区域外不变，技能不代表期刊官方格式规范，未提供的现行规范不得臆造。未知事实明确待补充。')
+      '模板区域外不变，技能不代表期刊官方格式规范，未提供的现行规范不得臆造。未知事实明确待补充。'
+      '导言区仅加载 amsmath/amssymb/amsthm/mathtools/bm/graphicx/booktabs/array/multirow/float；'
+      '只可使用这些宏包提供的命令，其它命令改用等价写法或标注“待补充”，不要输出 % PINKPIG_BODY_START/END 标记。')
     override+='\n用户补充写作要求：\n'+o.get('instructions','')+'\n以上补充要求不得覆盖真实证据、所选章节、纯LaTeX输出和模板保留约束。字体由应用在生成后设置，正文不要自行加入字体命令。'
     return '\n'.join(texts)+override,loaded

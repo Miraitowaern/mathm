@@ -75,16 +75,16 @@ def run(app,t,o):
             audits={}
             source_audit=app.SKILLS/'nature-figure/scripts/validate_figure.py'
             if source_audit.exists():
-                checked=subprocess.run([sys.executable,'-I','-B',str(source_audit),str(project/'plot.py'),'--json'],capture_output=True,text=True,timeout=20)
+                checked=subprocess.run([sys.executable,'-B',str(source_audit),str(project/'plot.py'),'--json'],capture_output=True,text=True,timeout=20)
                 audits['source']=json.loads(checked.stdout)
                 if checked.returncode==1:raise ValueError('图片源码检查未通过，请检查固定绘图模板')
-            process=subprocess.run([sys.executable,'-I','-B',str(project/'plot.py')],cwd=project,env=env,capture_output=True,text=True,timeout=60)
+            process=subprocess.run([sys.executable,'-B',str(project/'plot.py')],cwd=project,env=env,capture_output=True,text=True,timeout=60)
             if process.returncode:raise ValueError('本地绘图失败；请确认绘图依赖已内置，数据列及字体可用。'+process.stderr[-350:])
             summary+=['- Python 本地生成 PNG（600dpi）、PDF 和 SVG；包内含固定绘图脚本、原始 CSV 和列映射，可复现。','- 仅生成用户选择的折线、柱状或散点图；不生成虚构误差线和显著性标记。']
             # Run the bundled Nature collision auditor against the actual PDF. Never claim an audit passed when unavailable.
             audit=app.SKILLS/'nature-figure/scripts/audit_figure_collisions.py'
             if audit.exists():
-                result=subprocess.run([sys.executable,'-I','-B',str(audit),str(project/'figure.pdf'),'--json-out',str(scratch/'collision.json')],capture_output=True,text=True,timeout=30)
+                result=subprocess.run([sys.executable,'-B',str(audit),str(project/'figure.pdf'),'--json-out',str(scratch/'collision.json')],capture_output=True,text=True,timeout=30)
                 status='未完成'
                 if (scratch/'collision.json').exists():
                     data=json.loads((scratch/'collision.json').read_text());status=str(data.get('verdict','已运行，见记录'))
@@ -94,7 +94,7 @@ def run(app,t,o):
             else:summary+=['- Nature PDF 碰撞审查工具不可用，未声称通过投稿级图片审查。']
             text_audit=app.SKILLS/'nature-figure/scripts/audit_pdf_text.py'
             if text_audit.exists():
-                checked=subprocess.run([sys.executable,'-I','-B',str(text_audit),str(project/'figure.pdf'),'--json'],capture_output=True,text=True,timeout=20)
+                checked=subprocess.run([sys.executable,'-B',str(text_audit),str(project/'figure.pdf'),'--json'],capture_output=True,text=True,timeout=20)
                 audits['pdf_text']=json.loads(checked.stdout)
                 if checked.returncode==1:raise ValueError('PDF 字号检查未通过，未交付图片')
             audits['panel_alignment']='NOT APPLICABLE: single-panel figure'

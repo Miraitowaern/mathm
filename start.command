@@ -1,8 +1,9 @@
 #!/bin/zsh
-set -e
 cd "$(dirname "$0")"
 if [[ -x .venv/bin/python ]]; then
-  exec .venv/bin/python start.py --open
+  .venv/bin/python start.py --open
+elif [[ -x /Users/xu77/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 ]]; then
+  /Users/xu77/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 start.py --open
 else
-  exec python3 start.py --open
+  python3 start.py --open
 fi

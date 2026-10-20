@@ -1,24 +1,23 @@
+# 本地数据与密钥（禁止入库）
+data/
 .env
 .env.*
 !.env.example
-.venv/
-venv/
-__pycache__/
-*.py[cod]
-.pytest_cache/
-.DS_Store
-data/
-*.sqlite*
-*.db
-*.log
+
+# 构建产物与二进制（体积大，不入库）
+PinkPig.app/
+MathM.app/
 *.app/
-*.zip
-*.dmg
-build/
-dist/
+PinkPig.zip
+desktop/build/
 desktop/module-cache/
-outputs/
-work/
-skills/*
-!skills/mathm-latex-writing/
-!skills/mathm-latex-writing/**
+
+# 验证用论文/赛题材料（体积大）
+verification/
+
+# 工具内部与虚拟环境
+.trae/
+.venv/
+__pycache__/
+*.pyc
+.DS_Store

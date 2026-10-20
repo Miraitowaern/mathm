@@ -11,7 +11,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
     var currentPort: Int = 0
     var quitting = false
     let fm = FileManager.default
-    var support: URL { fm.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support/MathM", isDirectory: true) }
+    var support: URL { fm.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support/PinkPig", isDirectory: true) }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         installMenu()
@@ -19,7 +19,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
         webView = WKWebView(frame: .zero, configuration: config)
         webView.navigationDelegate = self; webView.uiDelegate = self
         window = NSWindow(contentRect: NSRect(x:0,y:0,width:1280,height:850), styleMask:[.titled,.closable,.miniaturizable,.resizable], backing:.buffered, defer:false)
-        window.title = "MathM · 数模研究工作台"
+        window.title = "pinkpig 科研平台"
         window.minSize = NSSize(width:820,height:620)
         let container=NSView(frame:NSRect(x:0,y:0,width:1280,height:850))
         webView.translatesAutoresizingMaskIntoConstraints=false
@@ -27,19 +27,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
         NSLayoutConstraint.activate([webView.leadingAnchor.constraint(equalTo:container.leadingAnchor),webView.trailingAnchor.constraint(equalTo:container.trailingAnchor),webView.topAnchor.constraint(equalTo:container.topAnchor),webView.bottomAnchor.constraint(equalTo:container.bottomAnchor)])
         window.contentView = container; window.center(); window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
-        webView.loadHTMLString("<html><body style='background:#f6f7f9;font:18px -apple-system;color:#117f75;padding:100px'>MathM 正在启动本地研究空间…</body></html>", baseURL:nil)
+        webView.loadHTMLString("<html><body style='background:#f6f7f9;font:18px -apple-system;color:#117f75;padding:100px'>pinkpig 科研平台正在启动本地研究空间…</body></html>", baseURL:nil)
         startBackend()
     }
     func installMenu() {
         let menu = NSMenu(); let appItem = NSMenuItem(); menu.addItem(appItem)
         let appMenu = NSMenu(); appItem.submenu = appMenu
-        appMenu.addItem(withTitle:"关于 MathM",action:#selector(about),keyEquivalent:"")
+        appMenu.addItem(withTitle:"关于 pinkpig",action:#selector(about),keyEquivalent:"")
         appMenu.addItem(.separator())
         appMenu.addItem(withTitle:"打开数据目录",action:#selector(openData),keyEquivalent:"d")
         appMenu.addItem(withTitle:"打开模型配置",action:#selector(openConfig),keyEquivalent:",")
         appMenu.addItem(withTitle:"查看运行日志",action:#selector(openLogs),keyEquivalent:"")
         appMenu.addItem(.separator())
-        appMenu.addItem(withTitle:"退出 MathM",action:#selector(NSApplication.terminate(_:)),keyEquivalent:"q")
+        appMenu.addItem(withTitle:"退出 pinkpig",action:#selector(NSApplication.terminate(_:)),keyEquivalent:"q")
         let editItem = NSMenuItem(); menu.addItem(editItem); let edit = NSMenu(title:"编辑");editItem.submenu = edit
         for (name,action,key) in [("撤销","undo:","z"),("剪切","cut:","x"),("复制","copy:","c"),("粘贴","paste:","v"),("全选","selectAll:","a")] {
             edit.addItem(withTitle:name,action:Selector(action),keyEquivalent:key)
@@ -51,14 +51,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
         NSApp.mainMenu=menu
     }
     @objc func about() {
-        NSApp.orderFrontStandardAboutPanel(options:[.applicationName:"MathM",.applicationVersion:(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.5.0"),.credits:NSAttributedString(string:"数模研究工作台\n本地材料 · 真实进度 · 技能审查\n模型连接需自行配置。")])
+        NSApp.orderFrontStandardAboutPanel(options:[.applicationName:"pinkpig 科研平台",.applicationVersion:"0.6.0",.credits:NSAttributedString(string:"数模求解 · 科研写作\n本地材料 · 真实进度 · 技能协作\n模型连接需自行配置。")])
     }
     @objc func openData() { NSWorkspace.shared.open(support.appendingPathComponent("data")) }
     @objc func openLogs() { NSWorkspace.shared.open(support.appendingPathComponent("logs")) }
     @objc func openConfig() {
         let path=support.appendingPathComponent(".env")
         if !fm.fileExists(atPath:path.path) {
-            let text="# 填写后请退出并重新打开 MathM\nMATHM_API_KEY=\nMATHM_BASE_URL=https://api.openai.com/v1\nMATHM_MODEL=\n"
+            let text="# 填写后请退出并重新打开 pinkpig 科研平台\nPINKPIG_API_KEY=\nPINKPIG_BASE_URL=https://api.openai.com/v1\nPINKPIG_MODEL=\n"
             try? text.write(to:path,atomically:true,encoding:.utf8)
             try? fm.setAttributes([.posixPermissions:0o600],ofItemAtPath:path.path)
         }
@@ -69,7 +69,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
     @objc func zoomOut() { webView.pageZoom = max(0.7,webView.pageZoom-0.1) }
     func startBackend() {
         do {
-            guard let resources=Bundle.main.resourceURL else { throw NSError(domain:"MathM",code:1,userInfo:[NSLocalizedDescriptionKey:"应用资源缺失"]) }
+            guard let resources=Bundle.main.resourceURL else { throw NSError(domain:"pinkpig",code:1,userInfo:[NSLocalizedDescriptionKey:"应用资源缺失"]) }
             try fm.createDirectory(at:support.appendingPathComponent("logs"),withIntermediateDirectories:true)
             let runDir=support.appendingPathComponent("run/"+UUID().uuidString,isDirectory:true)
             try fm.createDirectory(at:runDir,withIntermediateDirectories:true)
@@ -78,9 +78,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
             process.executableURL=resources.appendingPathComponent("runtime/bin/python3.12")
             process.arguments=["-I","-B",resources.appendingPathComponent("backend/desktop_server.py").path]
             var env=ProcessInfo.processInfo.environment
-            env["MATHM_DESKTOP_SUPPORT"]=support.path
-            env["MATHM_READY_FILE"]=readyFile.path
-            env["MATHM_BUNDLED_SKILLS"]=resources.appendingPathComponent("skills").path
+            env["PINKPIG_DESKTOP_SUPPORT"]=support.path
+            env["PINKPIG_READY_FILE"]=readyFile.path
+            env["PINKPIG_BUNDLED_SKILLS"]=resources.appendingPathComponent("skills").path
             env["PYTHONNOUSERSITE"]="1"
             env.removeValue(forKey:"PYTHONHOME");env.removeValue(forKey:"PYTHONPATH")
             process.environment=env
@@ -107,7 +107,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
         if Date().timeIntervalSince(started)>30 { timer?.invalidate();showError("启动超过30秒，请通过应用菜单查看运行日志。") }
     }
     func showError(_ message:String) {
-        let alert=NSAlert();alert.messageText="MathM 启动遇到问题";alert.informativeText=message
+        let alert=NSAlert();alert.messageText="pinkpig 科研平台启动遇到问题";alert.informativeText=message
         alert.addButton(withTitle:"查看日志");alert.addButton(withTitle:"关闭")
         if alert.runModal() == .alertFirstButtonReturn { openLogs() }
     }

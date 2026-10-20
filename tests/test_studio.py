@@ -1,4 +1,3 @@
-from _support import fixture_skills
 import base64,json,os,sys,tempfile,unittest,zipfile
 from pathlib import Path
 from unittest.mock import patch
@@ -9,8 +8,8 @@ def file(name,text,role='support'):
  return {'name':name,'role':role,'content':base64.b64encode(text.encode()).decode()}
 class StudioTest(unittest.TestCase):
  def setUp(self):
-  self.tmp=tempfile.TemporaryDirectory();self.old=(app.DATA,app.SKILLS);app.DATA=Path(self.tmp.name);app.SKILLS=fixture_skills(app.DATA/"skills");app.init()
- def tearDown(self):app.DATA,app.SKILLS=self.old;self.tmp.cleanup()
+  self.tmp=tempfile.TemporaryDirectory();self.old=app.DATA;app.DATA=Path(self.tmp.name);app.init()
+ def tearDown(self):app.DATA=self.old;self.tmp.cleanup()
  def make(self,mode,files,**opts):
   with patch.dict(os.environ,{'MATHM_API_KEY':'test','MATHM_MODEL':'mock'}):
    return app.create_task(dict(name='科研模块验收',flow='writing',engine='local' if mode in ('figure','table') else 'ai',consent=True,files=files,writing_options={'mode':mode,'paper_kind':'research',**opts}))
